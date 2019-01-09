@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -12,11 +13,14 @@ import javax.imageio.stream.FileImageInputStream;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.io.FileHandler;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -80,16 +84,44 @@ public class BasePage {
      
      public WebElement getElement(String locatorKey) throws FileNotFoundException, IOException {
     	 WebElement e = null;
-    	 if(locatorKey.endsWith("_id"))
-    		e= driver.findElement(By.id(loaddata(locatorKey)));
-    	 else if(locatorKey.endsWith("_name"))
-    		 e=  driver.findElement(By.name(loaddata(locatorKey)));
-    	 else if(locatorKey.endsWith("_xpath"))
-    		 e=  driver.findElement(By.xpath(loaddata(locatorKey)));
+    	 try {
+			if(locatorKey.endsWith("_id"))
+				e= driver.findElement(By.id(loaddata(locatorKey)));
+			 else if(locatorKey.endsWith("_name"))
+				 e=  driver.findElement(By.name(loaddata(locatorKey)));
+			 else if(locatorKey.endsWith("_xpath"))
+				 e=  driver.findElement(By.xpath(loaddata(locatorKey)));
+			 else
+			 {
+				 reportFailure("Locator not correct ---"+ locatorKey );
+			 }
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			 
+		}
 		return e;
 		 
 		
 	}
+
+
+	public void reportFailure(String Mssg) throws IOException {
+		 takeScreenShot();
+		 
+		
+	}
+
+
+	public void takeScreenShot() throws IOException {
+		 
+		Date dt = new Date();
+		String screenshotFileName	=  dt.toString().replace(":", "_").replace(" ", "_")+".png";
+		File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+		  
+		  //FileUtils.copyFile(scrFile, new File(System.getProperty("user.dir")+"//screenshots//"+screenshotFileName));
+		  FileHandler.copy(scrFile, new File(System.getProperty("user.dir")+"//Failure//"+screenshotFileName));
+	} 
 
 
 	public void click(String locatorKey) throws FileNotFoundException, IOException {
